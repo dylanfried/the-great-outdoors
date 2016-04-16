@@ -18,7 +18,7 @@ class DisqusCommand(Command):
             app.logger.debug("Executing popular posts")
             for result in disqus.posts.listPopular(method="GET"):
                 if result.get('message',None):
-                    print "AUTHOR:%s\nDATE:%s\nPOST:%s\n" % (result.get('author',{}).get('name','ANONYMOUS'),result.get('createdAt','N/A'),result.get('message','N/A'))
+                    print "FORUM:%s\nAUTHOR:%s\nDATE:%s\nPOST:%s\n" % (result.get('forum','N/A'),result.get('author',{}).get('name','ANONYMOUS'),result.get('createdAt','N/A'),result.get('message','N/A'))
                     time.sleep(3)
         elif trending_threads:
             app.logger.debug("Executing trending threads")
