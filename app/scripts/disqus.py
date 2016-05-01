@@ -5,6 +5,7 @@ from disqusapi import DisqusAPI, Paginator
 import time
 import random
 import csv
+import traceback
 
 class DisqusCommand(Command):
 
@@ -53,16 +54,21 @@ class DisqusCommand(Command):
             paginator = Paginator(disqus.threads.list,method="GET",related="forum",limit=100)
             forums = []
             counter = 0
-            for result in paginator:
-                counter += 1
-                if counter % 50 == 0:
-                    print "COUNT: %s" % counter
-                forums.append({
-                    "ID":result['forum']['id'],
-                    "URL":result['forum']['url'],
-                    "DESCRIPTION":result['forum']['description'],
-                    "CATEGORY":result['forum']['category']
-                })
+            try:
+                for result in paginator:
+                    counter += 1
+                    if counter % 50 == 0:
+                        print "COUNT: %s, # of forums: %s" % (counter, len(forums))
+                    # Only add a forum to the list if it isn't already on the list
+                    if result['forum']['id'] not in [f['ID'] for f in forums]:
+                        forums.append({
+                            "ID":result['forum']['id'].encode('utf-8'),
+                            "URL":result['forum']['url'].encode('utf-8'),
+                            "DESCRIPTION":(result['forum']['description'].encode('utf-8') if result['forum']['description'] else None),
+                            "CATEGORY":(result['forum']['category'].encode('utf-8') if result['forum']['category'] else None)
+                        })
+            except:
+                print "Breaking out and writing to file. Exc: %s" % traceback.format_exc()
             with open("forums.csv","w") as csvfile:
                 writer = csv.DictWriter(csvfile, fieldnames=['ID','URL','DESCRIPTION','CATEGORY'])
                 writer.writeheader()
